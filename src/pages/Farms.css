@@ -1,0 +1,85 @@
+.map-container {
+	padding-top: calc(0.5rem);
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.farm-list {
+	position: absolute;
+
+	width: 200px;
+	height: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: start;
+
+	/* position: fixed; */
+	top: 90px;
+
+	z-index: 0;
+}
+
+.farm-list-handle {
+	margin: 5px;
+	margin-top: -5px;
+	margin-bottom: -4px;
+	width: 20px;
+	height: 20px;
+	overflow: hidden;
+	/* margin-top: 10px; */
+}
+
+.farm-list-content {
+	width: auto;
+}
+
+.farm-list-item > * {
+	margin-right: 1vh;
+}
+
+.tool-name {
+	margin-left: 10px;
+}
+
+#farm-list-switch {
+	margin-bottom: 15px;
+	max-height: 60vh;
+	overflow-y: auto;
+}
+
+#farm-loading-spinner {
+	position: absolute;
+	margin-top: 15%;
+	margin-left: 50%;
+	transform: ;
+	color: #26979f;
+}
+
+#plant-type-switch {
+	margin-top: 5px;
+}
+
+#edit-type-switch {
+	margin-top: 5px;
+}
+#grow-tool-text {
+	margin-bottom: 15px;
+}
+
+#leave-farm-button {
+	margin-top: 20px;
+}
+
+#farm-member-list {
+	max-height: 50vh;
+	overflow: auto;
+}
+
+/* #manage-farm-button {
+	margin-left: 1vh;
+} */
+
+.drag {
+	cursor: grab;
+}
