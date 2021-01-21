@@ -1,19 +1,18 @@
-import React, { useContext } from 'react';
+import React, {useContext} from 'react';
 import { AuthContext } from '../context/auth';
 import usePreference from '../hooks/usePreference';
-import './Preferences.css';
 function Preferences() {
 	const { user } = useContext(AuthContext);
 	const {
 		loading,
-		error,
-		data,
-		handleChange,
-		editProfile,
-		newProfileAlert,
-		showNewProfileAlert,
+        error,
+        data,
+        handleChange,
+        editProfile,
+        newProfileAlert,
+        showNewProfileAlert
 	} = usePreference();
-
+	
 	return (
 		<>
 			<div className='preferences'>
@@ -22,8 +21,13 @@ function Preferences() {
 			{loading ? (
 				<></>
 			) : (
-				<h3 id='under-construction'>The best is yet to come...</h3>
+				<div>
+					<h3>{user.username}</h3>
+					<h3>{data.getUserData.email}</h3>
+					<h3>{data.getUserData.profile}</h3>
+				</div>
 			)}
+			
 		</>
 	);
 }

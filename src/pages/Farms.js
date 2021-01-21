@@ -1,7 +1,7 @@
 import './Farms.css';
 
 import React, { useEffect, useState } from 'react';
-import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { ListGroup, Button, Dropdown } from 'react-bootstrap';
 import { IconContext } from 'react-icons';
 import { BsFilePost } from 'react-icons/bs';
@@ -42,24 +42,18 @@ const Farms = ({}) => {
 		// leaveFarm,
 
 		showCreateFarmAlert,
-		history,
+		// history,
 		showCreateFarmPopUp,
 		setShowCreateFarmPopUp,
 		showManageFarmPopUp,
 		setShowManageFarmPopUp,
 	} = useFarms();
 
-	// const [selectedFarmIndex, setSelectedFarmIndex] = useState(-1);
-	// // console.log(selectedFarmIndex);
-
 	return (
 		<IconContext.Provider value={{}}>
 			<div className='map-container'>
 				<Switch>
-					<Route exact path='/farms/'>
-						<Redirect to='/farms/-1' />
-					</Route>
-					<Route exact path='/farms/-1'>
+					<Route exact path='/farms'>
 						<div className='map-not-selected'>
 							<h1 className='map-not-selected-text'>
 								Select a farm...
@@ -80,7 +74,6 @@ const Farms = ({}) => {
 									setShowManageFarmPopUp={
 										setShowManageFarmPopUp
 									}
-									// setSelectedFarmIndex={setSelectedFarmIndex}
 								/>
 							</Route>
 						))
@@ -106,7 +99,7 @@ const Farms = ({}) => {
 										<ListGroup.Item
 											eventKey={key}
 											onClick={() => onSelectFarm(key)}
-											active={selectedFarm == key}
+											active={selectedFarm === key}
 											className='farm-list-item'
 										>
 											<span>{farm.farmName}</span>
@@ -117,9 +110,9 @@ const Farms = ({}) => {
 													id='manage-farm-button'
 													size='sm'
 													onClick={() => {
-														// console.log(
-														// 	'show manage'
-														// );
+														console.log(
+															'show manage'
+														);
 														setShowManageFarmPopUp(
 															true
 														);

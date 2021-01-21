@@ -51,7 +51,7 @@ function CreateNewFarmPopUp({
 
 					<Button
 						variant='primary'
-						type='submit'
+						// type='submit'
 						onClick={() => createNewFarm()}
 					>
 						Create!

@@ -1,6 +1,6 @@
 .friends-root {
 	overflow-y: auto;
-	max-height: 95vh;
+	max-height: 90vh;
 }
 .friends-root * {
 	overflow-y: visible;
