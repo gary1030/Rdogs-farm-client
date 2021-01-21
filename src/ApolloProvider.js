@@ -16,12 +16,16 @@ const localhost = false;
 
 // Create an http link:
 const httpLink = new HttpLink({
-	uri: 'https://rdogs-farm.herokuapp.com/',
+	uri: localhost
+		? 'http://localhost:5000'
+		: 'https://rdogs-farm.herokuapp.com/',
 });
 
 // Create a WebSocket link:
 const wsLink = new WebSocketLink({
-	uri: 'wss://rdogs-farm.herokuapp.com/graphql',
+	uri: localhost
+		? `ws://localhost:5000/graphql`
+		: `wss://rdogs-farm.herokuapp.com/graphql`,
 	options: { reconnect: true },
 });
 
