@@ -138,22 +138,6 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 
 	//add a member to this farm
 	const addNewMember = async friendId => {
-		// if (friendName === '') {
-		// 	setAddMemberError('Please enter a friend name.');
-		// 	setShowAddMemberError(true);
-		// }
-		// let id = '';
-		// for (let i = 0; i < friends.length - 1; i++) {
-		// 	if (friends[i].username === friendName) {
-		// 		id = friends[i].id;
-		// 		break;
-		// 	}
-		// }
-		// if (id === ''){
-		// 	setAddMemberError("Please enter your friend's name.");
-		// 	setShowAddMemberError(true);
-		// }
-		// else{
 		setShowAddMemberError(false);
 		try {
 			const res = await addFarmer({
@@ -306,7 +290,7 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 	};
 
 	const handleChunkCellHover = ({ chunkCoordinates, cellCoordinates }) => {
-		console.log('hover');
+		// console.log('hover', selectedMovePlant);
 		if (selectedTool === 'PLANT') {
 			let valid = true;
 			let cueSize;
@@ -475,41 +459,47 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 
 	const handlePlantClicked = index => {
 		setClickedPlant(farmData.getFarm.plants[index]);
-
-		switch (selectedTool) {
-			case 'EDIT':
-				switch (selectedEdit) {
-					case 'MOVE':
-						if (
-							!selectedMovePlant &&
-							clickedPlant.author === user.username
-						) {
-							setSelectedMovePlant(true);
-						}
-
-						break;
-					case 'REWRITE':
-						if (
-							(clickedPlant.plantType === 'Post' ||
-								clickedPlant.plantType === 'Comment') &&
-							clickedPlant.author === user.username
-						) {
-							setShowRewritePlantPopUp(true);
-						}
-						break;
-					default:
-						break;
-				}
-				break;
-			case 'HARVEST':
-				{
-					if (clickedPlant.author === user.username) {
-						setShowHarvestPlantPopUp(true);
-					}
-				}
-				break;
-		}
+		console.log(clickedPlant);
 	};
+
+	useEffect(() => {
+		if (clickedPlant !== { title: '', body: '' }) {
+			switch (selectedTool) {
+				case 'EDIT':
+					switch (selectedEdit) {
+						case 'MOVE':
+							if (
+								!selectedMovePlant &&
+								clickedPlant.author === user.username
+							) {
+								setSelectedMovePlant(true);
+							}
+
+							break;
+						case 'REWRITE':
+							if (
+								(clickedPlant.plantType === 'Post' ||
+									clickedPlant.plantType === 'Comment') &&
+								clickedPlant.author === user.username
+							) {
+								setShowRewritePlantPopUp(true);
+							}
+							break;
+						default:
+							break;
+					}
+					break;
+				case 'HARVEST':
+					{
+						if (clickedPlant.author === user.username) {
+							setShowHarvestPlantPopUp(true);
+						}
+					}
+					break;
+			}
+		}
+	}, [clickedPlant]);
+
 	const handleRewritePlantSubmit = async (title, content) => {
 		switch (clickedPlant.plantType) {
 			case 'Post':

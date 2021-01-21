@@ -17,7 +17,7 @@ import FriendInfo from '../components/FriendInfo';
 import useFriends from '../hooks/useFriends';
 import './Friends.css';
 
-const Friends = ({userData, setUserData}) => {
+const Friends = ({ userData, setUserData }) => {
 	const { user, logout } = useContext(AuthContext);
 
 	const {
@@ -42,17 +42,14 @@ const Friends = ({userData, setUserData}) => {
 	const logOut = () => {
 		setUserData({
 			loggedIn: false,
-		})
+		});
 		//console.log(userData);
 		logout();
-	}
-
-	// useEffect(() => {
-	// });
+	};
 
 	return (
 		<div className='friends-root'>
-			<Container fluid>
+			<Container fluid id='friend-container'>
 				<Row className='justify-content-md-center'>
 					<Col xs={200}>
 						<StdBox className='user-info' title='Me' width={824}>
@@ -62,7 +59,12 @@ const Friends = ({userData, setUserData}) => {
 								large
 							></FriendInfo>
 							<div className='request-list-buttons'>
-								<Button variant='secondary' onClick={()=>logOut()}>Log out</Button>
+								<Button
+									variant='secondary'
+									onClick={() => logOut()}
+								>
+									Log out
+								</Button>
 							</div>
 						</StdBox>
 					</Col>
@@ -100,7 +102,11 @@ const Friends = ({userData, setUserData}) => {
 							</InputGroup>
 							<Alert
 								show={showInvitationAlert}
-								variant='warning'
+								variant={
+									invitationAlert === 'Request sent!'
+										? 'primary'
+										: 'warning'
+								}
 								onClose={() => dismissInvitationAlert()}
 								dismissible
 							>
@@ -165,7 +171,7 @@ const Friends = ({userData, setUserData}) => {
 													>
 														Accept
 													</Button>
-													<Button 
+													<Button
 														onClick={() => {
 															declineInv(
 																friend.username

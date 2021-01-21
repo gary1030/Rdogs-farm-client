@@ -9,16 +9,14 @@ import {
 	DECLINE_INVITATION_MUTATION,
 	FRIEND_LIST_SUBSCRIPTION,
 	GET_FRIENDS_LIST_QUERY,
+	GET_INVITATION_LIST_QUERY,
 } from '../graphql';
 
 const useFriends = () => {
 	const { user } = useContext(AuthContext);
 
 	const [inviteFriendName, setInviteFriendName] = useState('');
-	const [invitation, setInvitation] = useState([]);
-	const [friends, setFriends] = useState([]);
-	const [hasGetFriend, setHasGetFriend] = useState(false);
-	const [hasGetInv, setHasGetInv] = useState(false);
+
 	const [invitationAlert, setInvitationAlert] = useState('');
 	const [acceptInvitationAlert, setAcceptInvitationAlert] = useState('');
 	const [declineInvitationAlert, setDeclineInvitationAlert] = useState('');
@@ -37,32 +35,63 @@ const useFriends = () => {
 	const [acceptInvitation] = useMutation(ACCEPT_INVITATION_MUTATION);
 	const [declineInvitation] = useMutation(DECLINE_INVITATION_MUTATION);
 
-	const { data } = useQuery(GET_FRIENDS_LIST_QUERY, {
+	const { data: friends, subscribeToMore: subscribeToMore1 } = useQuery(GET_FRIENDS_LIST_QUERY, {
 		variables: {
 			userId: user.id,
 		},
-		pollInterval: 5000,
 	});
 
-	// useEffect(()=>{
-	// 	console.log(data.getFriendList);
-	// 	setFriends(data.getFriendList);
-	// }, [data])
+	const { data: invitations, subscribeToMore: subscribeToMore2 } = useQuery(GET_INVITATION_LIST_QUERY, {
+		variables: {
+			userId: user.id,
+		},
+	});
 
-	// useEffect(()=>{
-	// 	subscribeToMore({
-	// 		document: FRIEND_LIST_SUBSCRIPTION,
-	// 		variables: {userId: user.id},
-	// 		updateQuery: (prev, { subscriptionData }) => {
-	// 			if (!subscriptionData.data) return prev
-	// 			const newFriend = subscriptionData.friendList.friend;
-	// 			console.log(newFriend);
-	// 			console.log(prev);
-	// 			return { friends: [...prev.friends, newFriend]};
-	// 		},
-	// 		onError: err => console.log(err)
-	// 	})
-	// }, [subscribeToMore])
+	useEffect(() => {
+		subscribeToMore1({
+			document: FRIEND_LIST_SUBSCRIPTION,
+			variables: { userId: user.id },
+			updateQuery: (prev, { subscriptionData }) => {
+				if (!subscriptionData.data) return prev;
+				if (
+					subscriptionData.data.friendList.mutation === 'FRIEND_LIST'
+				) {
+					const newFriend = subscriptionData.data.friendList.friend;
+					//console.log(newFriend);
+					return {
+						...prev,
+						getFriendList: [...prev.getFriendList, newFriend],
+					};
+				} else {
+					return prev;
+				}
+			},
+			onError: err => console.log(err),
+		});
+	}, [subscribeToMore1, user.id]);
+
+	useEffect(() => {
+		subscribeToMore2({
+			document: FRIEND_LIST_SUBSCRIPTION,
+			variables: { userId: user.id },
+			updateQuery: (prev, { subscriptionData }) => {
+				if (!subscriptionData.data) return prev;
+				if (
+					subscriptionData.data.friendList.mutation === 'INVITATION_LIST'
+				) {
+					const newInvitation = subscriptionData.data.friendList.friend;
+					//console.log(newInvitation);
+					return {
+						...prev,
+						getInvitationList: [...prev.getInvitationList, newInvitation],
+					};
+				} else {
+					return prev;
+				}
+			},
+			onError: err => console.log(err),
+		});
+	}, [subscribeToMore2, user.id]);
 
 	const inviteFriend = async () => {
 		try {
@@ -73,6 +102,8 @@ const useFriends = () => {
 			});
 			console.log(res);
 			setInviteFriendName('');
+			setInvitationAlert('Request sent!');
+			setShowInvitationAlert(true);
 		} catch (err) {
 			setInvitationAlert(err.graphQLErrors[0].message);
 			setShowInvitationAlert(true);
@@ -80,14 +111,18 @@ const useFriends = () => {
 	};
 
 	const acceptInv = async friendName => {
+		for (let i = 0; i < invitations.getInvitationList.length; i++ ){
+			if(invitations.getInvitationList[i].username === friendName){
+				invitations.getInvitationList.splice(i , 1);
+				break;
+			}
+		}
 		try {
 			const res = await acceptInvitation({
 				variables: {
 					friendName: friendName,
 				},
-			});
-			setHasGetFriend(false);
-			setHasGetInv(false);
+			})
 		} catch (err) {
 			setAcceptInvitationAlert(err.graphQLErrors[0].message);
 			setShowAcceptInvitationAlert(true);
@@ -101,8 +136,6 @@ const useFriends = () => {
 					friendName: friendName,
 				},
 			});
-			setHasGetFriend(false);
-			setHasGetInv(false);
 		} catch (err) {
 			alert(err);
 			setDeclineInvitationAlert(err.message);
@@ -113,19 +146,6 @@ const useFriends = () => {
 	const getFriendsList = async () => {
 		try {
 			const res = await getFriends();
-			setFriends(res.data.getFriends);
-			setHasGetFriend(true);
-		} catch (err) {
-			//console.log(err);
-			alert(err);
-		}
-	};
-
-	const getInvitationsList = async () => {
-		try {
-			const res = await getInvitations();
-			setInvitation(res.data.getInvitations);
-			setHasGetInv(true);
 		} catch (err) {
 			//console.log(err);
 			alert(err);
@@ -147,13 +167,11 @@ const useFriends = () => {
 	};
 
 	useEffect(() => {
-		if (!hasGetFriend) {
+		if (!friends) {
 			getFriendsList();
 		}
-		if (!hasGetInv) {
-			getInvitationsList();
-		}
-	}, [hasGetFriend, hasGetInv]);
+
+	}, [friends]);
 
 	return {
 		handleChange,
@@ -170,8 +188,8 @@ const useFriends = () => {
 		dismissAcceptInvitationAlert,
 		dismissDeclineInvitationAlert,
 		inviteFriendName,
-		invitation,
-		friends,
+		invitation: (invitations && invitations.getInvitationList) || [],
+		friends: (friends && friends.getFriendList) || [],
 	};
 };
 export default useFriends;
