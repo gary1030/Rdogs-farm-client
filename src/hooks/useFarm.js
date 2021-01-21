@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
 import { AuthContext } from '../context/auth';
 import {
 	CREATE_PLANT_MUTATION,
@@ -34,12 +34,12 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 		loading: getFarmLoading,
 		error: getFarmError,
 		data: farmData,
-		//subscribeToMore,
+		subscribeToMore,
 	} = useQuery(GET_FARM_QUERY, {
 		variables: {
 			farmId: farmId,
 		},
-		pollInterval: 500,
+		// pollInterval: 500,
 	});
 
 	const [getFriends] = useMutation(GET_FRIENDS_MUTATION);
@@ -50,6 +50,36 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 	const [addNewChunk] = useMutation(ADD_CHUNK_MUTATION);
 	const [addChunkError, setAddChunkError] = useState('');
 	const [showAddChunkError, setShowAddChunkError] = useState(false);
+
+	// const { data, loading } = useSubscription(FARM_SUBSCRIPTION, { variables: { farmId } });
+
+	useEffect(()=>{
+		subscribeToMore({
+			document: FARM_SUBSCRIPTION,
+			variables: { farmId: farmId },
+			updateQuery: (prev, { subscriptionData }) => {
+				if(!subscriptionData.data) return prev;
+				if(subscriptionData.data.farm.mutation === 'CREATED_PLANT')
+				{
+					const newPlant = subscriptionData.data.farm.plant;
+					prev.getFarm.plants.push(newPlant);
+					return prev;
+				}
+				else if(subscriptionData.data.farm.mutation === 'EDITED_PLANT')
+				{
+					const editedPlant = subscriptionData.data.farm.plant;
+					prev.getFarm.plants[subscriptionData.data.farm.index] = editedPlant;
+					return prev;
+				}
+				else if(subscriptionData.data.farm.mutation === 'DELETED_PLANT')
+				{
+					const deletedIndex = subscriptionData.data.farm.index;
+					prev.getFarm.plants.splice(deletedIndex, 1);
+					return prev;
+				}
+			}
+		});
+	}, [subscribeToMore, farmId])
 
 	function checkPlantCollision(
 		chunkCoordinates,
@@ -83,6 +113,8 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					break;
 				case 'Reaction':
 					plantSize = 1;
+					break;
+				default:
 			}
 
 			const xCollide =
@@ -183,9 +215,8 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					},
 				},
 			});
-			console.log(res);
 		} catch (err) {
-			console.log('createPlant Error: ', err);
+			console.error('createPlant Error: ', err);
 		}
 	};
 
@@ -218,9 +249,9 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					},
 				},
 			});
-			console.log(res);
+			// console.log(res);
 		} catch (err) {
-			console.log('editPlant Error: ', err);
+			console.error('editPlant Error: ', err);
 		}
 	};
 
@@ -232,9 +263,9 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					plantId: plantId,
 				},
 			});
-			console.log('deletePlant result: ', res);
+			// console.log('deletePlant result: ', res);
 		} catch (err) {
-			alert('deletePlant Error: ', err.graphQLErrors[0].message);
+			console.error('deletePlant Error: ', err.graphQLErrors[0].message);
 		}
 	};
 
@@ -250,16 +281,16 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					},
 				},
 			});
-			console.log(res);
+			// console.log(res);
 		} catch (err) {
-			console.log(err.graphQLErrors[0].message);
+			console.error(err.graphQLErrors[0].message);
 			setAddChunkError(err.graphQLErrors[0].message);
 			setShowAddChunkError(true);
 		}
 	};
 
 	const handleChunkCellClicked = async coordinates => {
-		console.log('click', coordinates);
+		// console.log('click', coordinates);
 		setClickedCell(coordinates);
 		switch (selectedTool) {
 			case 'PLANT':
@@ -309,7 +340,7 @@ const useFarm = (farmId, selectedTool, selectedPlant, selectedEdit) => {
 					setPositionCueType('reaction');
 					break;
 				default:
-					console.log('Invalid selected plant');
+					console.error('Invalid selected plant');
 			}
 			// check collision with farm border
 			if (cellCoordinates.x + cueSize > 32) {
